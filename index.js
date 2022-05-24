@@ -36,6 +36,7 @@ async function run() {
         const toolsCollection = client.db('best_tools_manufacturer').collection('tools');
         const purchaseCollection = client.db('best_tools_manufacturer').collection('purchase');
         const usersCollection = client.db('best_tools_manufacturer').collection('users');
+        const reviewCollection = client.db('best_tools_manufacturer').collection('customer_review');
 
         // get all tools item
         app.get('/tools', async (req, res) => {
@@ -128,6 +129,19 @@ async function run() {
             const user = await usersCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin });
+        })
+
+        // Customer review
+        app.get('/reviews', async (req, res) => {
+            const reviews = await reviewCollection.find({}).toArray();
+            res.send(reviews)
+        })
+
+        // Add a review
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
         })
 
     }
