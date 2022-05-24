@@ -38,6 +38,13 @@ async function run() {
         const usersCollection = client.db('best_tools_manufacturer').collection('users');
         const reviewCollection = client.db('best_tools_manufacturer').collection('customer_review');
 
+        // Add Tools
+        app.post('/addTool', async (req, res) => {
+            const tool = req.body;
+            const result = await toolsCollection.insertOne(tool);
+            res.send(result);
+        })
+
         // get all tools item
         app.get('/tools', async (req, res) => {
             const cursor = toolsCollection.find({});
@@ -51,6 +58,14 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const tool = await toolsCollection.findOne(query);
             res.send(tool);
+        })
+
+        // Delete specific tool item
+        app.delete('/tool/:id',verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await toolsCollection.deleteOne(query);
+            res.send(result);
         })
 
         // Add purchase information
@@ -96,7 +111,7 @@ async function run() {
             const updateDoc = { $set: user };
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             // console.log(process.env.ACCESS_TOKEN_SECRET);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5h' });
             // console.log(token);
             res.send({result,token});
         })
