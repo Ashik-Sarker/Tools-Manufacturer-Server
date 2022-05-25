@@ -38,6 +38,18 @@ async function run() {
         const usersCollection = client.db('best_tools_manufacturer').collection('users');
         const reviewCollection = client.db('best_tools_manufacturer').collection('customer_review');
 
+        // verify admin
+        const verifyAdmin = async(req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await usersCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                next()
+            }
+            else{
+                return res.status(403).send({ message: 'Forbidden access' });
+            }
+        }
+
         // Add Tools
         app.post('/addTool', async (req, res) => {
             const tool = req.body;
@@ -123,19 +135,13 @@ async function run() {
         })
 
         // Update users as an admin
-        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+
+        app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;
-            const requester = req.decoded.email;
-            const requesterAccount = await usersCollection.findOne({ email: requester });
-            if (requesterAccount.role === 'admin') {
-                const filter = { email: email };
-                const updateDoc = { $set: {role:'admin'} };
-                const result = await usersCollection.updateOne(filter, updateDoc);
-                return res.send(result);
-            }
-            else{
-                return res.status(403).send({ message: 'Forbidden access' });
-            }
+            const filter = { email: email };
+            const updateDoc = { $set: {role:'admin'} };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            return res.send(result)
         })
 
         // Verify admin
