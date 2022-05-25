@@ -38,6 +38,7 @@ async function run() {
         const purchaseCollection = client.db('best_tools_manufacturer').collection('purchase');
         const usersCollection = client.db('best_tools_manufacturer').collection('users');
         const reviewCollection = client.db('best_tools_manufacturer').collection('customer_review');
+        const paymentsCollection = client.db('best_tools_manufacturer').collection('payments');
 
         // verify admin
         const verifyAdmin = async(req, res, next) => {
@@ -121,6 +122,23 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await purchaseCollection.findOne(query);
             res.send(result);
+        })
+
+        // Update myOrders
+        app.patch('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                }
+            }
+            const result = await paymentsCollection.insertOne(payment);
+            const updatedOrder = await purchaseCollection.updateOne(filter, updateDoc);
+
+            res.send(updatedOrder);
         })
 
         // Add users
