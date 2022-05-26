@@ -94,6 +94,12 @@ async function run() {
             res.send(result);
         })
 
+        // get all purchase info
+        app.get('/allOrders', async (req, res) => {
+            const orders = await purchaseCollection.find({}).toArray();
+            res.send(orders)
+        })
+
         // get purchase info for specific user
         app.get('/myOrders', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -124,7 +130,7 @@ async function run() {
             res.send(result);
         })
 
-        // Update myOrders
+        // Update myOrders as paid
         app.patch('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
@@ -136,6 +142,22 @@ async function run() {
                 }
             }
             const result = await paymentsCollection.insertOne(payment);
+            const updatedOrder = await purchaseCollection.updateOne(filter, updateDoc);
+
+            res.send(updatedOrder);
+        })
+
+        // Update myOrders as shift now
+        app.patch('/shiftNow/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const shiftingInfo = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    shiftNow:true
+                }
+            }
+            const result = await paymentsCollection.insertOne(shiftingInfo);
             const updatedOrder = await purchaseCollection.updateOne(filter, updateDoc);
 
             res.send(updatedOrder);
