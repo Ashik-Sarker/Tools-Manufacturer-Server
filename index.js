@@ -1,10 +1,12 @@
-const express = require('express')
-const cors = require('cors')
-const jwt = require('jsonwebtoken');
-const app = express()
-const port = process.env.PORT || 5000
 require('dotenv').config();
-const { MongoClient, ServerApiVersion, MongoCursorInUseError, ObjectId } = require('mongodb');
+const express = require('express')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const app = express()
+const port = process.env.PORT || 5000;
+
+const cors = require('cors')
+
+const jwt = require('jsonwebtoken');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // middleware
@@ -34,7 +36,8 @@ function verifyJWT(req, res, next) {
 }
 
 
-async function run() {
+// async function run() {
+const run = async () => {
     try {
         await client.connect();
         const toolsCollection = client.db('best_tools_manufacturer').collection('tools');
@@ -253,7 +256,8 @@ async function run() {
     }
     finally{}
 }
-run().catch(console.dir);
+// run().catch(console.dir);
+run().catch((err) => console.log(err));
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
